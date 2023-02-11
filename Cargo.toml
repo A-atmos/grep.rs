@@ -3,8 +3,8 @@ name = "grep-rs"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-
-
+authors = ["Aavash Chhetri <aavashchhetri01@gmail.com>", "Mukti Subedi <077bct048.mukti@pcampus.edu.np>", "Kushal Poudel <077bct039.kushal@pcampus.edu.np>" ]
+repository = "https://github.com/A-atmos/grep.rs/"
 description = "A tool to search files"
 readme = "README.md"
 categories = ["command-line-utilities"]
@@ -12,3 +12,4 @@ categories = ["command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = { version = "4.1.3", features = ["derive"] }
