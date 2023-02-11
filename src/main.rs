@@ -10,8 +10,13 @@ use std::io::prelude::*;
 
 //     /// Regex expression
 //     expr: String,
-// }
+// }// 1.6.1
 
+use colored::Colorize;
+fn print_found_line(x: &i32, line: &str, found: &str) {
+    let line_to_print = line.replace(found, &found.green().to_string());
+    println!("[{}] {}", x.to_string().blue(), line_to_print);
+}
 const FILENAME: &str = "FILENAME";
 const STRINGTOFIND: &str = "STRINGTOFIND";
 const RECURSIVE: &str = "RECURSIVE";
@@ -44,11 +49,11 @@ fn main() -> std::io::Result<()> {
     println!("{}", args.get_one::<String>("STRINGTOFIND").unwrap());
     _chk.push_str(_c.as_str());
     _chk.push('*');
+
     let mut sentence_line = 0;
     for sentence in _line {
         if lib::is_match(sentence.to_string(), _chk.to_string()) {
-            print!("Line: {} ", sentence_line);
-            println!("{}\n", sentence);
+            print_found_line(&sentence_line, sentence, &_c);
         }
         sentence_line += 1;
     }
