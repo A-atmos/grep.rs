@@ -1,5 +1,5 @@
 use clap::{Arg, Command};
-mod lib;
+use grep_rs::matcher;
 use std::fs::File;
 use std::io::prelude::*;
 // #[derive(Parser, Debug)]
@@ -52,7 +52,7 @@ fn main() -> std::io::Result<()> {
 
     let mut sentence_line = 0;
     for sentence in _line {
-        if lib::is_match(sentence.to_string(), _chk.to_string()) {
+        if matcher::is_match_regex(sentence.to_string(), _chk.to_string()) {
             print_found_line(&sentence_line, sentence, &_c);
         }
         sentence_line += 1;
