@@ -20,7 +20,7 @@ fn print_found_line(x: &i32, line: &str, found: &str) {
 const FILENAME: &str = "FILENAME";
 const STRINGTOFIND: &str = "STRINGTOFIND";
 const RECURSIVE: &str = "RECURSIVE";
-const IGNORE_CASESENSETIVE: &str = "IGNORE";
+const IGNORE_CASESENSITIVE: &str = "IGNORE";
 fn main() -> std::io::Result<()> {
     // EASY TO IMPLEMENT OTHER FEATURES LATER
     let args = Command::new("GREPS")
@@ -36,10 +36,10 @@ fn main() -> std::io::Result<()> {
                 .help("Search recursively across dir"),
         )
         .arg(
-            Arg::new(IGNORE_CASESENSETIVE)
+            Arg::new(IGNORE_CASESENSITIVE)
                 .long("ignore")
                 .short('i')
-                .help("ignore case sensetive"),
+                .help("ignore case SENSITIVE"),
         )
         .get_matches();
     let fileNames: Vec<_> = args.values_of(FILENAME).unwrap_or_default().collect();
@@ -63,7 +63,7 @@ fn main() -> std::io::Result<()> {
         let mut sentence_line = 1;
 
         for sentence in _line {
-            if args.is_present(IGNORE_CASESENSETIVE) {
+            if args.is_present(IGNORE_CASESENSITIVE) {
                 if matcher::is_match_regex(
                     sentence.to_string().to_lowercase(),
                     _chk.to_string().to_lowercase(),
