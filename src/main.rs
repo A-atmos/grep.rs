@@ -27,7 +27,7 @@ fn main() -> std::io::Result<()> {
         .author("X")
         .about("Implementation of grep in rust")
         .arg(Arg::new(STRINGTOFIND))
-        .arg(Arg::new(FILENAME))
+        .arg(Arg::new(FILENAME).min_values(1))
         .arg(
             Arg::new(RECURSIVE)
                 .long("recursive")
@@ -35,27 +35,33 @@ fn main() -> std::io::Result<()> {
                 .help("Search recursively across dir"),
         )
         .get_matches();
-
-    let mut _file: File = File::open(args.get_one::<String>(FILENAME).unwrap())?;
-    let mut contents = String::new();
-
-    _file.read_to_string(&mut contents)?;
-
-    let _line: Vec<_> = contents.split("\n").collect();
+    let fileNames: Vec<_> = args.values_of(FILENAME).unwrap_or_default().collect();
+    // Checking all filenames
+    println!("{:?}", fileNames);
 
     // Check for all the values in between the value
     let mut _chk: String = String::from("*");
     let mut _c = String::from(args.get_one::<String>(STRINGTOFIND).unwrap());
     println!("{}", args.get_one::<String>("STRINGTOFIND").unwrap());
+
     _chk.push_str(_c.as_str());
     _chk.push('*');
+    // let mut _file: File = File::open(args.get_one::<String>(FILENAME).unwrap())?;
 
-    let mut sentence_line = 0;
-    for sentence in _line {
-        if matcher::is_match_regex(sentence.to_string(), _chk.to_string()) {
-            print_found_line(&sentence_line, sentence, &_c);
+    for file in fileNames {
+        let mut contents = String::new();
+        let mut _file: File = File::open(file.to_string())?;
+        _file.read_to_string(&mut contents)?;
+        let _line: Vec<_> = contents.split("\n").collect();
+        let mut sentence_line = 1;
+        for sentence in _line {
+            if matcher::is_match_regex(sentence.to_string(), _chk.to_string()) {
+                print!("{} ", file.magenta());
+                print_found_line(&sentence_line, sentence, &_c);
+            }
+            sentence_line += 1;
         }
-        sentence_line += 1;
+        println!("");
     }
 
     Ok(())
