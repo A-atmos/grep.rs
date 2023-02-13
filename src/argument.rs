@@ -12,11 +12,6 @@ pub fn _parse_args() -> ArgMatches {
 		.args(&[
 			Arg::new("STRINGTOFIND"),
 			Arg::new("FILENAME").min_values(1),
-			Arg::new("file")
-				.help("Target file sepearated with (\\n)!")
-				.short('f')
-				.long("file")
-				.takes_value(true),
 			Arg::new("RECURSIVE")
                 .long("recursive")
                 .short('r')
