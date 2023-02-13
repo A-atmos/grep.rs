@@ -14,3 +14,4 @@ categories = ["command-line-utilities"]
 [dependencies]
 clap = { version = "3.2.17", features = ["derive"] }
 colored = "2.0.0"
+walkdir = "2"

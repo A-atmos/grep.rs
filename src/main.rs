@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 use colored::Colorize;
+use grep_rs::argument::_parse_args;
+use grep_rs::{matcher, KMP};
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
-
-use grep_rs::argument::_parse_args;
-use grep_rs::{matcher, KMP};
+use walkdir::WalkDir;
 
 use std::time::Instant;
 
@@ -38,7 +38,16 @@ fn main() -> std::io::Result<()> {
     _chk.push('*');
     let mut currentFiles: Vec<String> = vec![];
     // Check whether CURRENT_DIRECTORY flag -c is given or not
-    if args.is_present(CURRENT_DIRECTORY) {
+
+    if args.is_present(RECURSIVE) {
+        for e in WalkDir::new(".").into_iter().filter_map(|e| e.ok()) {
+            if e.metadata().unwrap().is_file() {
+                if (e.path().display().to_string().contains("txt")) {
+                    currentFiles.push(e.path().display().to_string());
+                }
+            }
+        }
+    } else if args.is_present(CURRENT_DIRECTORY) {
         let mut paths = fs::read_dir("./").unwrap();
 
         for mut path in paths {
@@ -56,7 +65,7 @@ fn main() -> std::io::Result<()> {
             // let _filep = File::open(path.unwrap().path().display().to_string()).expect("Hello");
         }
     }
-
+    // To convert simply to &str from String type
     let v2: Vec<&str> = currentFiles.iter().map(|s| &**s).collect();
     println!("{:?}", v2);
     for file in if args.is_present(CURRENT_DIRECTORY) {
