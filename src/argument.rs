@@ -21,7 +21,13 @@ pub fn _parse_args() -> ArgMatches {
 			Arg::new("IGNORE")
                 .long("ignore")
                 .short('i')
-                .help("ignore case sensetive"),
+                .help("ignore case sensetive")
+                .takes_value(false),
+            Arg::new("HAS_REGEX")
+                .long("regex pattern")
+                .short('p')
+                .help("find the regex pattern")
+                .takes_value(false),
 			
 		])
 		.get_matches()
