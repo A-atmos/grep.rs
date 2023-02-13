@@ -5,7 +5,7 @@ edition = "2021"
 license = "MIT"
 authors = ["Aavash Chhetri <aavashchhetri01@gmail.com>", "Mukti Subedi <077bct048.mukti@pcampus.edu.np>", "Kushal Poudel <077bct039.kushal@pcampus.edu.np>" ]
 repository = "https://github.com/A-atmos/grep.rs/"
-description = "A tool to search files"
+description = "A tool not to just search files but much more."
 readme = "README.md"
 categories = ["command-line-utilities"]
 
