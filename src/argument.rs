@@ -3,11 +3,13 @@ use clap::{App, AppSettings::ArgRequiredElseHelp, Arg, ArgMatches};
 
 pub fn _parse_args() -> ArgMatches {
     App::new("grep-rs")
-		.version("0.1.4")
-		.author("Aavash Chhetri <aavashchhetri01@gmail.com>,
-				Mukti Subedi <077bct048.mukti@pcampus.edu.np>, 
-				Kushal Poudel <077bct039.kushal@pcampus.edu.np>")
-		.about("A tool to search files")
+		.version("0.1.0")
+		.author("Authors: 
+        Aavash Chhetri <aavashchhetri01@gmail.com> 
+        Mukti Subedi <077bct048.mukti@pcampus.edu.np> 
+        Kushal Poudel <077bct039.kushal@pcampus.edu.np>")
+		.about("About: 
+        A tool not to just search files but much more.")
 		.setting(ArgRequiredElseHelp)
 		.args(&[
 			Arg::new("STRINGTOFIND"),
