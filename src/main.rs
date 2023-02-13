@@ -68,7 +68,7 @@ fn main() -> std::io::Result<()> {
     // To convert simply to &str from String type
     let v2: Vec<&str> = currentFiles.iter().map(|s| &**s).collect();
     println!("{:?}", v2);
-    for file in if args.is_present(CURRENT_DIRECTORY) {
+    for file in if args.is_present(CURRENT_DIRECTORY) || args.is_present(RECURSIVE) {
         v2
     } else {
         file_names

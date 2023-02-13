@@ -11,7 +11,7 @@ Basic Implementation of GREP using rust.
 - [x] search using wildcard expression (`*/?`)
 - [ ] search from stdin with pipe (i.e. `cat ./Cargo.toml | greps author`)
 - [x] search in a directory.
-- [ ] search recursive (-r or --recursive)
+- [x] search recursive (-r or --recursive)
 - [ ] exclude some dir (--exclude-dir=folder)
 - [ ] search for multiple words in a single file
 - [ ] show readable characters from a binary file
