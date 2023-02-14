@@ -15,11 +15,11 @@ pub fn is_match_regex(s: String, p: String) -> bool {
     }
     for i in 1..m + 1 {
         for j in 1..n + 1 {
-            let current_pattern = (&p[j - 1..j]).to_owned();
-            let current_str = (&s[i - 1..i]).to_owned();
-            if current_pattern != "*" {
+            let current_pattern = (&p.as_bytes()[j - 1..j]).to_owned();
+            let current_str = (&s.as_bytes()[i - 1..i]).to_owned();
+            if current_pattern != "*".as_bytes() {
                 dp[i][j] = dp[i - 1][j - 1]
-                    && (current_str == current_pattern || current_pattern == "?");
+                    && (current_str == current_pattern || current_pattern == "?".as_bytes());
             } else {
                 dp[i][j] = dp[i][j - 1] || dp[i - 1][j];
             }
