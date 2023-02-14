@@ -5,7 +5,6 @@ use grep_rs::{matcher, KMP};
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
-use std::time::Instant;
 use walkdir::WalkDir;
 
 const FILENAME: &str = "FILENAME";
@@ -27,7 +26,7 @@ fn main() -> std::io::Result<()> {
     let args = _parse_args();
 
     // Vector<&str> of file name entered in Command Line
-    let mut file_names: Vec<_> = args.values_of(FILENAME).unwrap_or_default().collect();
+    let file_names: Vec<_> = args.values_of(FILENAME).unwrap_or_default().collect();
 
     // #debug Checking all filenames
     println!("{:?}", file_names);
@@ -39,20 +38,20 @@ fn main() -> std::io::Result<()> {
 
     _chk.push_str(_c.as_str());
     _chk.push('*');
-    let mut currentFiles: Vec<String> = vec![];
+    let mut current_files: Vec<String> = vec![];
     // Check whether CURRENT_DIRECTORY flag -r is given or not
     // If user inputs both -r as well as current directory flag (-c) then -r will be selected by default
     if args.is_present(RECURSIVE) {
         for e in WalkDir::new(".").into_iter().filter_map(|e| e.ok()) {
             if e.metadata().unwrap().is_file() {
-                if (e.path().display().to_string().contains("txt")) {
-                    currentFiles.push(e.path().display().to_string());
+                if e.path().display().to_string().contains("txt") {
+                    current_files.push(e.path().display().to_string());
                 }
             }
         }
     } else if args.is_present(CURRENT_DIRECTORY) {
         // For current directory
-        let mut paths = fs::read_dir("./").unwrap();
+        let paths = fs::read_dir("./").unwrap();
 
         for mut path in paths {
             if path
@@ -63,14 +62,14 @@ fn main() -> std::io::Result<()> {
                 .to_string()
                 .contains("txt")
             {
-                currentFiles.push(path.unwrap().path().display().to_string());
+                current_files.push(path.unwrap().path().display().to_string());
             }
 
             // let _filep = File::open(path.unwrap().path().display().to_string()).expect("Hello");
         }
     }
     // To convert simply to &str from String type
-    let v2: Vec<&str> = currentFiles.iter().map(|s| &**s).collect();
+    let v2: Vec<&str> = current_files.iter().map(|s| &**s).collect();
     // #debug
     println!("{:?}", v2);
 
@@ -87,8 +86,6 @@ fn main() -> std::io::Result<()> {
 
         if args.is_present(HAS_REGEX) {
             // the string literal is a regex pattern
-
-            let before = Instant::now();
             for sentence in _line {
                 if args.is_present(IGNORE_CASESENSETIVE) {
                     if matcher::is_match_regex(
@@ -107,19 +104,17 @@ fn main() -> std::io::Result<()> {
 
                 sentence_line += 1;
             }
-
-            println!("Elapsed time: {:.2?}", before.elapsed());
         } else {
             // the string literal is a word to search
 
             if args.is_present(IGNORE_CASESENSETIVE) {
                 let kmp = KMP::new(&_c.to_lowercase());
-                let before = Instant::now();
                 for sentence in _line {
                     if sentence == "" {
                         continue;
                     }
                     if kmp.index_of_any(&sentence.to_lowercase()) == -1 {
+                        sentence_line += 1;
                         continue;
                     } else {
                         print!("{} ", file.magenta());
@@ -127,16 +122,15 @@ fn main() -> std::io::Result<()> {
                     }
                     sentence_line += 1;
                 }
-                println!("Elapsed time: {:.2?}", before.elapsed());
             } else {
                 let kmp = KMP::new(&_c);
 
-                let before = Instant::now();
                 for sentence in _line {
                     if sentence == "" {
                         continue;
                     }
                     if kmp.index_of_any(&sentence) == -1 {
+                        sentence_line += 1;
                         continue;
                     } else {
                         print!("{} ", file.magenta());
@@ -144,7 +138,6 @@ fn main() -> std::io::Result<()> {
                     }
                     sentence_line += 1;
                 }
-                println!("Elapsed time: {:.2?}", before.elapsed());
             }
         }
     }
