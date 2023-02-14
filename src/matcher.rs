@@ -7,7 +7,7 @@ pub fn is_match_regex(s: String, p: String) -> bool {
     //if p == 0 s != 0 false
     //if s==0 p!=0 all of p is *?
     for j in 1..n+1 {
-        if &p[j - 1..j] == "*" {
+        if &p.as_bytes()[j - 1..j] == "*".as_bytes() {
             dp[0][j] = true
         } else {
             break;
