@@ -16,7 +16,12 @@ pub fn _parse_args() -> ArgMatches {
         .setting(ArgRequiredElseHelp)
         .args(&[
             Arg::new("STRINGTOFIND"),
-            Arg::new("FILENAME").min_values(1),
+            Arg::new("FILENAME")
+                .long("file")
+                .short('f')
+                .takes_value(true)
+                .required(false)
+                .help("Single or multiple file names"),
             Arg::new("RECURSIVE")
                 .long("recursive")
                 .short('r')
@@ -27,7 +32,7 @@ pub fn _parse_args() -> ArgMatches {
                 .help("ignore case sensetive")
                 .takes_value(false),
             Arg::new("HAS_REGEX")
-                .long("regex pattern")
+                .long("regex-pattern")
                 .short('p')
                 .help("find the regex pattern")
                 .takes_value(false),
@@ -35,6 +40,13 @@ pub fn _parse_args() -> ArgMatches {
                 .long("current-directory")
                 .short('c')
                 .help("Search in current directory"),
+            Arg::new("WORD")
+				.long("word")
+				.short('w')
+				.help("Search a exact word in file"),
+            Arg::new("PREPROCESSOR")
+                .long("pre-processor")
+                .help("Serialize the file into a trie to search for better efficency"),
         ])
         .get_matches()
 }
