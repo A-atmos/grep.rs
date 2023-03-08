@@ -139,7 +139,6 @@ fn main() -> std::io::Result<()> {
                         let res = trie_ds.search(_c.as_str()); 
                         if res.0 {
                             
-                            println!("{:?}",res.1);
                             for _line_no in res.1{
                                 let reader = io::BufReader::new(File::open(file.to_string()).expect("Cannot open file"));
 
@@ -150,7 +149,7 @@ fn main() -> std::io::Result<()> {
                                     .parse::<String>()
                                     .expect("invalid String");
 
-                                println!("{}",value);
+                                print_found_line(&(_line_no as i32 +1), &value, &_c);
                             }
 
                         }                        

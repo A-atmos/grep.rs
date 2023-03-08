@@ -25,14 +25,13 @@ pub fn file_present_or_create(path: String, case_insensitive: bool)-> CharNode{
     //calculate the checksum of the file
     let hash = Sha256::digest(content.buffer());
     let mut st_hash = format!("{:x}",hash).to_owned();
-    println!("{}",st_hash);
 
     st_hash = ".gs_cache/".to_string() + &st_hash;
 
     let path = Path::new(st_hash.as_str());
 
     if path.exists(){
-        print!("Path Exists");
+        // Path Exists
         let mut json_file = File::open(path).expect("Unable to create json file");
         let mut json_content = String::new();
         json_file.read_to_string(&mut json_content).expect("Unable to read file");
@@ -40,7 +39,7 @@ pub fn file_present_or_create(path: String, case_insensitive: bool)-> CharNode{
         trie_data = serde_json::from_str(&json_content).unwrap();
     }
     else{
-        print!("Path doesn't exist");
+        // path doesnot exist
         let mut json_file : File;
         if Path::new(".gs_cache").is_dir(){
         }
@@ -89,7 +88,6 @@ pub fn serialized_file_present(path: String)->bool{
     //calculate the checksum of the file
     let hash = Sha256::digest(content.buffer());
     let mut st_hash = format!("{:x}",hash).to_owned();
-    println!("{}",st_hash);
 
     st_hash = ".gs_cache/".to_string() + &st_hash;
 
