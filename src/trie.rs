@@ -5,6 +5,8 @@ use serde::{Serialize,Deserialize};
 pub struct CharNode {
     end : bool,
     pub next : HashMap<char, CharNode>,
+    pub line_no : Vec<usize>,
+
 }
 
 impl CharNode {
@@ -12,39 +14,49 @@ impl CharNode {
         CharNode {
             next : HashMap::new(),
             end : false,
+            line_no : vec![],
         }
     }
 
-    pub fn insert(&mut self, string : &str) {
+    pub fn insert(&mut self, string : &str, _line_no : usize) {
         let first_char = string.chars().next();
         if let Some(character) = &first_char {
             if self.next.contains_key(character) {
-                self.next.get_mut(character).unwrap().insert(&string[1..]);
+                let string_vec = string.chars().collect::<Vec<_>>();
+                let _string = string_vec[1..].iter().cloned().collect::<String>();
+                self.next.get_mut(character).unwrap().insert(&_string,_line_no);
             } else {
                 let mut next_charnode = CharNode::new();
-                next_charnode.insert(&string[1..]);
+                let string_vec = string.chars().collect::<Vec<_>>();
+                let _string = string_vec[1..].iter().cloned().collect::<String>();
+                next_charnode.insert(&_string,_line_no);
                 self.next.insert(*character, next_charnode);
             }
         } else {
             self.end = true;
+            self.line_no.push(_line_no);
         }
     }
 
-    pub fn search( &mut self, string: &str)->bool{
+    pub fn search( &mut self, string: &str)->(bool,Vec<usize>){
         let first_char = string.chars().next();
         if let Some(character) = &first_char {
             if self.next.contains_key(character){ 
                 return self.next.get_mut(character).unwrap().search(&string[1..]);
             }
             else{
-                return false;
+                return (false,vec![]);
             }
         }
         else
         {
-            return self.end;
+            return (self.end, self.line_no.clone());
         }
     }
+
+
+    
+
 
 }
 
@@ -59,9 +71,9 @@ mod test {
 
     fn trie_search(){
         let mut word_searcher = CharNode::new();
-        for _ in "I am a good girl Iva".split(' ').map(|word| word_searcher.insert(word.trim())) {};
+        for _ in "I am a good girl Iva".split(' ').map(|word| word_searcher.insert(word.trim(),0)) {};
 
-        assert_eq!(false,word_searcher.search("Girl") );
-        assert_eq!(true,word_searcher.search("girl"));
+        assert_eq!(false,word_searcher.search("Girl").0);
+        assert_eq!(true,word_searcher.search("girl").0);
     }
 }

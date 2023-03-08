@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use std::{io::prelude::*,fs::File, fs::create_dir, path::Path};
+use std::{io::prelude::*,fs::File, fs::create_dir, path::Path, io};
 use super::trie::CharNode;
 use sha2::{Sha256,Digest};
 
@@ -17,13 +17,13 @@ pub fn file_present_or_create(path: String, case_insensitive: bool)-> CharNode{
     let mut trie_data  =  CharNode::new();
 
     // read from file and store the text in contents
-    let mut file = File::open(path).expect("File not Found");
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).expect("Unable to read file");
-    
+    let file = File::open(path).expect("File not Found");
+
+    let content = io::BufReader::new(file);
+
 
     //calculate the checksum of the file
-    let hash = Sha256::digest(contents.as_bytes());
+    let hash = Sha256::digest(content.buffer());
     let mut st_hash = format!("{:x}",hash).to_owned();
     println!("{}",st_hash);
 
@@ -33,9 +33,9 @@ pub fn file_present_or_create(path: String, case_insensitive: bool)-> CharNode{
 
     if path.exists(){
         print!("Path Exists");
-        let mut json_file = File::open(path).expect("msg");
+        let mut json_file = File::open(path).expect("Unable to create json file");
         let mut json_content = String::new();
-        json_file.read_to_string(&mut json_content).expect("msg");
+        json_file.read_to_string(&mut json_content).expect("Unable to read file");
 
         trie_data = serde_json::from_str(&json_content).unwrap();
     }
@@ -45,19 +45,30 @@ pub fn file_present_or_create(path: String, case_insensitive: bool)-> CharNode{
         if Path::new(".gs_cache").is_dir(){
         }
         else{
-            create_dir(".gs_cache").expect("msg");
+            create_dir(".gs_cache").expect("Unable to create directory!");
         }
-        json_file = File::create(&path).expect("msg");
+        json_file = File::create(&path).expect("Unable to create json file");
 
-        if case_insensitive {
-            contents = contents.to_lowercase();
+    
+        
+        let _lines = content.lines();
+
+        for (idx,str) in _lines.enumerate(){
+
+            if let Ok(mut item) = str{
+
+                if case_insensitive{
+                    item = item.to_lowercase();
+                }
+                for _ in item.split(' ').map(|word| trie_data.insert(word.trim(),idx)) {};
+            }
+            
         }
+
         
-        
-        for _ in contents.split(' ').map(|word| trie_data.insert(word.trim())) {};
         let serialized = serde_json::to_string(&trie_data).unwrap();
 
-        json_file.write_all(serialized.as_bytes()).expect("msg");
+        json_file.write_all(serialized.as_bytes()).expect("Unable to write");
 
 
     }
@@ -70,13 +81,13 @@ pub fn file_present_or_create(path: String, case_insensitive: bool)-> CharNode{
 }
 
 pub fn serialized_file_present(path: String)->bool{
-    let mut file = File::open(path).expect("File not Found");
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).expect("Unable to read file");
-    
+    let file = File::open(path).expect("File not Found");
+
+    let content = io::BufReader::new(file);
+
 
     //calculate the checksum of the file
-    let hash = Sha256::digest(contents.as_bytes());
+    let hash = Sha256::digest(content.buffer());
     let mut st_hash = format!("{:x}",hash).to_owned();
     println!("{}",st_hash);
 
@@ -84,4 +95,12 @@ pub fn serialized_file_present(path: String)->bool{
 
     let path = Path::new(st_hash.as_str());
     return path.exists();
+}
+
+// The output is wrapped in a Result to allow matching on errors
+// Returns an Iterator to the Reader of the lines of the file.
+pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where P: AsRef<Path>, {
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
 }

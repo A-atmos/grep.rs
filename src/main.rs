@@ -4,8 +4,8 @@ use grep_rs::{matcher,
             argument::_parse_args,
             dlf::{print_found_line, serialized_file_present},
             dlf::file_present_or_create,
-            trie::CharNode};
-use std::{fs,fs::File,io::prelude::*};
+            trie::{CharNode}};
+use std::{fs,fs::File,io::prelude::*,io};
 
 use walkdir::WalkDir;
 
@@ -134,8 +134,26 @@ fn main() -> std::io::Result<()> {
                                                          args.is_present("IGNORE")
                                                         );
                         
-                        // just prints if the string is present or not                                
-                        println!("{}",trie_ds.search(_c.as_str()));
+                        // just prints if the string is present or not 
+
+                        let res = trie_ds.search(_c.as_str()); 
+                        if res.0 {
+                            
+                            println!("{:?}",res.1);
+                            for _line_no in res.1{
+                                let reader = io::BufReader::new(File::open(file.to_string()).expect("Cannot open file"));
+
+                                let value: String = reader.lines()
+                                    .nth(_line_no)
+                                    .expect("Invalid Input")
+                                    .expect("could not read 5th line")
+                                    .parse::<String>()
+                                    .expect("invalid String");
+
+                                println!("{}",value);
+                            }
+
+                        }                        
                     }
                     else{
                         let mut contents = String::new();
