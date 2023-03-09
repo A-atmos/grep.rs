@@ -13,7 +13,7 @@ Basic Implementation of GREP using rust.
 - [x] search in a directory.
 - [x] search recursive (-r or --recursive)
 - [ ] exclude some dir (--exclude-dir=folder)
-- [ ] search for multiple words in a single file
+- [x] search for multiple words in a single file
 - [ ] show readable characters from a binary file
 - [ ] search for a certain text from the readable characters from a binary file
 - [ ] test for string and wildcards expression in normal text files and binary files
