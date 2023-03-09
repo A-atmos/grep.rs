@@ -28,6 +28,7 @@ fn main() -> std::io::Result<()> {
     }
 
 
+
     if args.is_present("RECURSIVE") {
         for e in WalkDir::new(".").into_iter().filter_map(|e| e.ok()) {
             if e.metadata().unwrap().is_file() {
@@ -94,22 +95,152 @@ fn main() -> std::io::Result<()> {
         else{
             _chk = _chk.to_string();
         }
-    
-        for file in if args.is_present("CURRENT_DIRECTORY") || args.is_present("RECURSIVE") {
-            v2
-        } else {
-            _file_names
-        } {
-    
+
+
+        if args.is_present("FILENAME") || args.is_present("CURRENT_DIRECTORY") || args.is_present("RECURSIVE"){
+            for file in if args.is_present("CURRENT_DIRECTORY") || args.is_present("RECURSIVE") {
+                v2
+            } else {
+                _file_names
+            } {
+        
+                if args.is_present("HAS_REGEX") {
+                    let mut contents = String::new();
+                    let mut _file: File = File::open(file.to_string())?;
+                    _file.read_to_string(&mut contents)?;
+                    let _line: Vec<_> = contents.split("\n").collect();
+                    let mut sentence_line = 1;
+                    // the string literal is a regex pattern
+                    let mut _sentence: String;
+                    for sentence in _line {
+                        if args.is_present("IGNORE") 
+                        {
+                            _sentence = sentence.to_string().to_lowercase();
+                        }
+                        else{
+                            _sentence = sentence.to_string();
+                        }
+        
+                        if matcher::is_match_regex(_sentence, _chk.to_string()) {
+                            print!("{} ", file.magenta());
+                            print_found_line(&sentence_line, sentence, &_c);
+                        }
+        
+                        sentence_line += 1;
+                    }
+                }
+                else {
+                    if args.is_present("WORD"){
+                        if serialized_file_present(file.to_string()){
+                            let mut trie_ds : CharNode = file_present_or_create(
+                                                            file.to_string(),
+                                                            args.is_present("IGNORE")
+                                                            );
+                            
+                            // just prints if the string is present or not 
+
+                            let res = trie_ds.search(_c.as_str()); 
+                            if res.0 {
+                                
+                                for _line_no in res.1{
+                                    let reader = io::BufReader::new(File::open(file.to_string()).expect("Cannot open file"));
+
+                                    let value: String = reader.lines()
+                                        .nth(_line_no)
+                                        .expect("Invalid Input")
+                                        .expect("could not read 5th line")
+                                        .parse::<String>()
+                                        .expect("invalid String");
+
+                                    print_found_line(&(_line_no as i32 +1), &value, &_c);
+                                }
+
+                            }                        
+                        }
+                        else{
+                            let mut contents = String::new();
+                            let mut _file: File = File::open(file.to_string())?;
+                            _file.read_to_string(&mut contents)?;
+                            let _line: Vec<_> = contents.split("\n").collect();
+                            let mut sentence_line = 1;
+                            // the string literal is a word to search
+                            let kmp = KMP::new(&_c);
+                            let mut _sentence: String;
+            
+                            for sentence in _line {
+                                
+                                if args.is_present("IGNORE") 
+                                {
+                                    _sentence = sentence.to_string().to_lowercase();
+                                }
+                                else{
+                                    _sentence = sentence.to_string();
+                                }
+                                if sentence == "" {
+                                    continue;
+                                }
+                                if kmp.index_of_any(&_sentence) == -1 {
+                                    sentence_line += 1;
+                                    continue;
+                                } else {
+                                    print!("{} ", file.magenta());
+                                    print_found_line(&sentence_line, &sentence, &_c);
+                                }
+                                sentence_line += 1;
+                                
+                            }
+                        }
+                    }
+                    else{
+                        let mut contents = String::new();
+                            let mut _file: File = File::open(file.to_string())?;
+                            _file.read_to_string(&mut contents)?;
+                            let _line: Vec<_> = contents.split("\n").collect();
+                            let mut sentence_line = 1;
+                            // the string literal is a word to search
+                            let kmp = KMP::new(&_c);
+                            let mut _sentence: String;
+            
+                            for sentence in _line {
+                                
+                                if args.is_present("IGNORE") 
+                                {
+                                    _sentence = sentence.to_string().to_lowercase();
+                                }
+                                else{
+                                    _sentence = sentence.to_string();
+                                }
+                                if sentence == "" {
+                                    continue;
+                                }
+                                if kmp.index_of_any(&_sentence) == -1 {
+                                    sentence_line += 1;
+                                    continue;
+                                } else {
+                                    print!("{} ", file.magenta());
+                                    print_found_line(&sentence_line, &sentence, &_c);
+                                }
+                                sentence_line += 1;
+                                
+                            }
+                    }
+                }
+            }
+        }
+        else{
+            // read from stdin
+            let stdin = io::stdin();
+            let lines = stdin.lock().lines();
+
+
+
             if args.is_present("HAS_REGEX") {
-                let mut contents = String::new();
-                let mut _file: File = File::open(file.to_string())?;
-                _file.read_to_string(&mut contents)?;
-                let _line: Vec<_> = contents.split("\n").collect();
+                // if regex is present with stdin
                 let mut sentence_line = 1;
                 // the string literal is a regex pattern
                 let mut _sentence: String;
-                for sentence in _line {
+                for line in lines {
+                    let sentence = line.expect("Couldnot read line from stdin.");
                     if args.is_present("IGNORE") 
                     {
                         _sentence = sentence.to_string().to_lowercase();
@@ -119,78 +250,43 @@ fn main() -> std::io::Result<()> {
                     }
     
                     if matcher::is_match_regex(_sentence, _chk.to_string()) {
-                        print!("{} ", file.magenta());
-                        print_found_line(&sentence_line, sentence, &_c);
+                        print_found_line(&sentence_line, sentence.as_str(), &_c);
                     }
     
                     sentence_line += 1;
                 }
             }
-            else {
-                if args.is_present("WORD"){
-                    if serialized_file_present(file.to_string()){
-                        let mut trie_ds : CharNode = file_present_or_create(
-                                                        file.to_string(),
-                                                         args.is_present("IGNORE")
-                                                        );
-                        
-                        // just prints if the string is present or not 
+            else{
+                
+                let mut sentence_line = 1;
+                // the string literal is a word to search
+                let kmp = KMP::new(&_c);
+                let mut _sentence: String;
 
-                        let res = trie_ds.search(_c.as_str()); 
-                        if res.0 {
-                            
-                            for _line_no in res.1{
-                                let reader = io::BufReader::new(File::open(file.to_string()).expect("Cannot open file"));
-
-                                let value: String = reader.lines()
-                                    .nth(_line_no)
-                                    .expect("Invalid Input")
-                                    .expect("could not read 5th line")
-                                    .parse::<String>()
-                                    .expect("invalid String");
-
-                                print_found_line(&(_line_no as i32 +1), &value, &_c);
-                            }
-
-                        }                        
+                for line in lines {
+                    let sentence = line.expect("Error reading input from stdin");
+                    if args.is_present("IGNORE") 
+                    {
+                        _sentence = sentence.to_string().to_lowercase();
                     }
                     else{
-                        let mut contents = String::new();
-                        let mut _file: File = File::open(file.to_string())?;
-                        _file.read_to_string(&mut contents)?;
-                        let _line: Vec<_> = contents.split("\n").collect();
-                        let mut sentence_line = 1;
-                        // the string literal is a word to search
-                        let kmp = KMP::new(&_c);
-                        let mut _sentence: String;
-        
-                        for sentence in _line {
-                            
-                            if args.is_present("IGNORE") 
-                            {
-                                _sentence = sentence.to_string().to_lowercase();
-                            }
-                            else{
-                                _sentence = sentence.to_string();
-                            }
-                            if sentence == "" {
-                                continue;
-                            }
-                            if kmp.index_of_any(&_sentence) == -1 {
-                                sentence_line += 1;
-                                continue;
-                            } else {
-                                print!("{} ", file.magenta());
-                                print_found_line(&sentence_line, &sentence, &_c);
-                            }
-                            sentence_line += 1;
-                            
-                        }
+                        _sentence = sentence.to_string();
                     }
+                    if sentence == "" {
+                        continue;
+                    }
+                    if kmp.index_of_any(&_sentence) == -1 {
+                        sentence_line += 1;
+                        continue;
+                    } else {
+                        print_found_line(&sentence_line, &sentence, &_c);
+                    }
+                    sentence_line += 1;
+                    
                 }
             }
-        }
 
+        }
     }
 
 
