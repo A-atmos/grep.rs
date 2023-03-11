@@ -1,47 +1,143 @@
-name: Release
-
-permissions:
-  contents: write
+name: Build release binaries!
 
 on:
   push:
     branches:
-    - main
+      - main
     tags:
-      - v[0-9]+.*
+      - "*"
 
 jobs:
-  create-release:
+  do-on-linux:
+    name: Build for ${{ matrix.target }}!
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: taiki-e/create-gh-release-action@v1
-        with:
-          # (required) GitHub token for creating GitHub Releases.
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  upload-assets:
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-    runs-on: ${{ matrix.os }}
+        include:
+          - type: aarch64-unknown-linux-gnu
+            target: aarch64-unknown-linux-gnu
+            name: aarch64-grep-rs-linux-gnu
+            path: target/aarch64-unknown-linux-gnu/release/grep-rs
+          - type: armv7-unknown-linux-gnueabihf
+            target: armv7-unknown-linux-gnueabihf
+            name: armv7-grep-rs-linux-gnueabihf
+            path: target/armv7-unknown-linux-gnueabihf/release/grep-rs
+          - type: i686-unknown-linux-gnu
+            target: i686-unknown-linux-gnu
+            name: i686-grep-rs-linux-gnu
+            path: target/i686-unknown-linux-gnu/release/grep-rs
+          - type: x86_64-unknown-linux-gnu
+            target: x86_64-unknown-linux-gnu
+            name: x86_64-grep-rs-linux-gnu
+            path: target/x86_64-unknown-linux-gnu/release/grep-rs
+          - type: aarch64-unknown-linux-musl
+            target: aarch64-unknown-linux-musl
+            name: aarch64-grep-rs-linux-musl
+            path: target/aarch64-unknown-linux-musl/release/grep-rs
+          - type: x86_64-pc-windows-gnu
+            target: x86_64-pc-windows-gnu
+            name: x86_64-grep-rs-windows-gnu
+            path: target/x86_64-pc-windows-gnu/release/grep-rs.exe
+      
     steps:
-      - uses: actions/checkout@v3
-      - uses: taiki-e/upload-rust-binary-action@v1
+        - uses: actions/checkout@v2
+
+        - uses: actions-rs/toolchain@v1
+          with:
+            toolchain: stable
+            target: ${{ matrix.target }}
+            override: true
+
+        - name: Install the requirements!
+          run: |
+            sudo apt update && sudo apt install -y mingw-w64
+        - name: Install Cross!
+          run: cargo install cross
+
+        - name: Build for ${{ matrix.target }}!
+          run: |
+            cross build --release --target ${{ matrix.target }}
+        - name: Upload artifacts!
+          uses: actions/upload-artifact@v2
+          with:
+            name: ${{ matrix.name }}
+            path: ${{ matrix.path }}
+
+
+  do-on-windows:
+    name: Build for ${{ matrix.target }}!
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        type: [i686-pc-windows-msvc, x86_64-pc-windows-msvc]
+        include:
+          - type: i686-pc-windows-msvc
+            target: i686-pc-windows-msvc
+            name: i686-grep-rs-windows-msvc
+            path: target/i686-pc-windows-msvc/release/grep-rs.exe
+          - type: x86_64-pc-windows-msvc
+            target: x86_64-pc-windows-msvc
+            name: x86_64-grep-rs-windows-msvc
+            path: target/x86_64-pc-windows-msvc/release/grep-rs.exe
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
         with:
-          # (required) Comma-separated list of binary names (non-extension portion of filename) to build and upload.
-          # Note that glob pattern is not supported yet.
-          bin: grep-rs
-          # (optional) On which platform to distribute the `.tar.gz` file.
-          # [default value: unix]
-          # [possible values: all, unix, windows, none]
-          tar: unix
-          # (optional) On which platform to distribute the `.zip` file.
-          # [default value: windows]
-          # [possible values: all, unix, windows, none]
-          zip: windows
-          # (required) GitHub token for uploading assets to GitHub Releases.
-          token: ${{ secrets.GITHUB_TOKEN }}
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Build for ${{ matrix.target }}!
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+      - name: Upload artifacts!
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.path }}
+
+
+  do-on-macos:
+    name: Build for ${{ matrix.target }}!
+    runs-on: macos-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - type: aarch64-apple-darwin
+            target: aarch64-apple-darwin
+            name: aarch64-grep-rs-macos
+            path: target/aarch64-apple-darwin/release/grep-rs
+          - type: x86_64-apple-darwin
+            target: x86_64-apple-darwin
+            name: x86_64-grep-rs-macos
+            path: target/x86_64-apple-darwin/release/grep-rs
+          - type: aarch64-apple-ios
+            target: aarch64-apple-ios
+            name: aarch64-grep-rs-apple-ios
+            path: target/aarch64-apple-ios/release/grep-rs
+          - type: x86_64-apple-ios
+            target: x86_64-apple-ios
+            name: x86_64-grep-rs-apple-ios
+            path: target/x86_64-apple-ios/release/grep-rs
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Build for ${{ matrix.target }}!
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+      - name: Upload artifacts!
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.path }}
