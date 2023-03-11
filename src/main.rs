@@ -5,10 +5,9 @@ use grep_rs::{matcher,
             dlf::{print_found_line, serialized_file_present},
             dlf::file_present_or_create,
             trie::{CharNode}};
-use std::{fs,fs::File,io::prelude::*,io};
-
+use std::{fs,fs::{File},io::prelude::*,io};
+use std::collections::HashSet;
 use walkdir::WalkDir;
-
 
 // Program begins here
 fn main() -> std::io::Result<()> {
@@ -29,6 +28,7 @@ fn main() -> std::io::Result<()> {
 
 
 
+    // processing filename for multiple files
     if args.is_present("RECURSIVE") {
         for e in WalkDir::new(".").into_iter().filter_map(|e| e.ok()) {
             if e.metadata().unwrap().is_file() {
@@ -60,12 +60,12 @@ fn main() -> std::io::Result<()> {
 
     // To convert simply to &str from String type
     let v2: Vec<&str> = current_files.iter().map(|s| &**s).collect();
-    // #debug print filename
-    println!("{:?}", v2);
+
 
 
     if args.is_present("PREPROCESSOR")
     {
+        // preprocessing the text if flag provided and serializing it into trie
         for file in if args.is_present("CURRENT_DIRECTORY") || args.is_present("RECURSIVE") {
             v2
         } else {
@@ -98,6 +98,7 @@ fn main() -> std::io::Result<()> {
 
 
         if args.is_present("FILENAME") || args.is_present("CURRENT_DIRECTORY") || args.is_present("RECURSIVE"){
+            // if search in a file
             for file in if args.is_present("CURRENT_DIRECTORY") || args.is_present("RECURSIVE") {
                 v2
             } else {
@@ -141,18 +142,21 @@ fn main() -> std::io::Result<()> {
 
                             let res = trie_ds.search(_c.as_str()); 
                             if res.0 {
+                                // result present
+                                let reader = io::BufReader::new(File::open(file.to_string()).expect("Cannot open file"));
+                                let mut lines = reader.lines().map(|l|l.unwrap());
                                 
-                                for _line_no in res.1{
-                                    let reader = io::BufReader::new(File::open(file.to_string()).expect("Cannot open file"));
+                                let mut dif = 0;
+                                // only unique elements
+                                let _lines = res.1.into_iter()
+                                .collect::<HashSet<_>>()
+                                .into_iter();
+                                
+                                for _line_no in _lines{
 
-                                    let value: String = reader.lines()
-                                        .nth(_line_no)
-                                        .expect("Invalid Input")
-                                        .expect("could not read 5th line")
-                                        .parse::<String>()
-                                        .expect("invalid String");
-
-                                    print_found_line(&(_line_no as i32 +1), &value, &_c);
+                                    let val = lines.nth(_line_no-dif).expect("msg");
+                                    dif = _line_no+1;
+                                    print_found_line(&(_line_no as i32 +1), &val, &_c);
                                 }
 
                             }                        
@@ -287,11 +291,7 @@ fn main() -> std::io::Result<()> {
             }
 
         }
-    }
-
-
-    // Vector<&str> of file name entered in Command Line
-    
+    }    
     
 
     Ok(())
