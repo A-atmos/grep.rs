@@ -5,7 +5,7 @@ use grep_rs::{matcher,
             dlf::{print_found_line, serialized_file_present},
             dlf::file_present_or_create,
             trie::{CharNode}};
-use std::{fs,fs::{File},io::prelude::*,io};
+use std::{fs,fs::{File},io::prelude::*,io, vec};
 use std::collections::HashSet;
 use walkdir::WalkDir;
 
@@ -152,7 +152,15 @@ fn main() -> std::io::Result<()> {
                                 .collect::<HashSet<_>>()
                                 .into_iter();
                                 
+                                let mut sorted_lines: Vec<usize> = vec![];
+
                                 for _line_no in _lines{
+                                    sorted_lines.push(_line_no);
+                                }
+
+                                sorted_lines.sort();
+
+                                for _line_no in sorted_lines{
 
                                     let val = lines.nth(_line_no-dif).expect("msg");
                                     dif = _line_no+1;
