@@ -5,9 +5,9 @@ pub fn _parse_args() -> ArgMatches {
         .version("0.1.0")
         .author(
             "Authors: 
-        Aavash Chhetri <aavashchhetri01@gmail.com> 
+        Aavash Chhetri <077bct004.aavash@pcampus.edu.np> 
         Mukti Subedi <077bct048.mukti@pcampus.edu.np> 
-        Kushal Poudel <077bct039.kushal@pcampus.edu.np>",
+        Kushal Paudel <077bct039.kushal@pcampus.edu.np>",
         )
         .about(
             "About: 
