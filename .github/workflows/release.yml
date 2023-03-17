@@ -2,8 +2,6 @@ name: Build release binaries!
 
 on:
   push:
-    branches:
-      - main
     tags:
       - "*"
 
